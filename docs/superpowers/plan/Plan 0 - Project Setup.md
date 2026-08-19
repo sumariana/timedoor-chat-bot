@@ -193,13 +193,19 @@ rate_limit:
 # Discord
 discord.py>=2.3.2
 
-# LLM — Gemini
+# LangChain — thin adapter for MCP connection + Gemini wrapper only
+# (Router logic in Module 3 is plain Python — LangChain does NOT orchestrate routing)
+langchain>=0.3.0
+langchain-google-genai>=2.0.0     # Gemini 2.0 Flash wrapper (used by Module 5)
+langchain-mcp-adapters>=0.0.5     # Notion MCP connection (used by Module 4)
+
+# LLM — Gemini SDK (used by Module 2 for intent classification via direct SDK)
 google-generativeai>=0.8.0
 
 # Notion
 notion-client>=2.2.1
 
-# MCP (Notion MCP server connection)
+# MCP protocol SDK — required transitively by langchain-mcp-adapters
 mcp>=1.0.0
 
 # Config & environment
@@ -262,10 +268,16 @@ class ParsedQuery:
 @dataclass
 class NotionResult:
     data: Optional[dict]                # structured data returned; None if not found
-    source: str                         # "api" or "mcp"
-    tier: int                           # 1, 2, or 3
+    source: Optional[str]               # "api" or "mcp"; None if no fetch was attempted
+    tier: Optional[int]                 # 1, 2, or 3; None if no fetch was attempted
     from_cache: bool
     notion_url: Optional[str]           # page URL — required for credential responses
+
+    # Not-found convention:
+    # - Project not found in any team DB → all fields None/False except from_cache=False
+    # - API returned null (fetch attempted) → source="api", tier=1/2, data=None
+    # - MCP fallback also returned null → source="mcp", tier=3, data=None
+    # Consumers should primarily check `data is None` to detect not-found.
 
 
 # ── Output of Module 5 (LLM Synthesizer) → input to Module 1 (Gateway) ──────
@@ -333,13 +345,40 @@ All dependencies are listed in `requirements.txt` (Step 5). Summary:
 
 ## 5. Integration Points
 
-`src/models.py` is the integration contract between all modules. Every inter-module data handoff uses one of these three classes:
+`src/models.py` is the integration contract between all modules. The actual data flow through the system is:
 
-| From | To | Data structure |
-|---|---|---|
-| Module 2 (Parser) | Module 3 (Router) | `ParsedQuery` |
-| Module 4 (Fetcher) | Module 5 (Synthesizer) | `NotionResult` |
-| Module 5 (Synthesizer) | Module 1 (Gateway) | `BotResponse` |
+```
+Module 1 (Gateway) receives Discord message
+   │
+   ▼  raw text
+Module 2 (Parser) → ParsedQuery
+   │
+   ▼  ParsedQuery
+Module 3 (Router) — resolves project name, decides routing
+   │
+   ▼  calls Module 4 functions per intent
+Module 4 (Fetcher) → NotionResult (per fetch)
+   │
+   ▼  returns NotionResult to Module 3
+Module 3 (Router) → list[tuple[QueryIntent, NotionResult]]
+   │
+   ▼  paired list
+Module 5 (Synthesizer) → BotResponse
+   │
+   ▼  BotResponse
+Module 1 (Gateway) → formats & sends to Discord
+```
+
+**Inter-module handoff contracts**:
+
+| From → To | Data structure |
+|---|---|
+| Module 1 → Module 2 | raw message text (str) + user_id, channel_id |
+| Module 2 → Module 3 | `ParsedQuery` |
+| Module 3 → Module 4 | function args (page_id, environment, etc.) — NOT a shared model |
+| Module 4 → Module 3 | `NotionResult` |
+| Module 3 → Module 5 | `list[tuple[QueryIntent, NotionResult]]` |
+| Module 5 → Module 1 | `BotResponse` |
 
 **If you need to add a field to any of these models, coordinate with the engineers on both sides of that handoff before changing `models.py`.**
 

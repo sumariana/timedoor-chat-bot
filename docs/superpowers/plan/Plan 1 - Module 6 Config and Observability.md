@@ -210,6 +210,22 @@ from src.config import get_config, get_error_logger
 
 ---
 
+### Step 5 — Health Check Endpoint (DEFERRED — production phase only)
+
+**Not implemented in the demo phase.** The PRD lists a `/health` FastAPI endpoint as a Module 6 sub-component, but it is explicitly gated to production deployment on Railway, and only after the supervisor approves the demo.
+
+When production migration happens (separate work stream after supervisor approval), add:
+
+- **File**: `apps/bot/src/config/health.py`
+- **Function**: `create_health_router() -> APIRouter` — returns a FastAPI router with a `GET /health` endpoint
+- **Checks**: Discord bot connection status, Notion API reachability, Gemini API reachability
+- **Wiring**: `main.py` runs FastAPI alongside `discord.py` via `asyncio.gather` (see PRD Section 15 — Production Migration)
+- **Dependencies**: Uncomment `fastapi` and `uvicorn` lines in `apps/bot/requirements.txt`
+
+**For demo phase**: skip this step entirely. Do not create `health.py`. Do not install FastAPI. The bot runs on a developer's local machine and needs no HTTP surface.
+
+---
+
 ## 4. Dependencies
 
 No new packages required beyond what is already in `requirements.txt`.

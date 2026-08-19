@@ -302,19 +302,25 @@ Classifies each question (or sub-question in a multi-question message) into one 
 Intent received
   │
   ├── project_info, status_query  → Tier 1 (Notion API, project properties)
+  │                                if API returns null → MCP fallback (page "Overview")
   │
   ├── bug_query, bug_query_env   → Tier 2 (Notion API, Bug List sub-DB)
+  │                                if API returns null → MCP fallback (page "Bug List")
   │
   ├── version_query              → Tier 2 (Notion API, Change Log sub-DB)
+  │                                if API returns null → MCP fallback (page "Change Log")
   │
   ├── credential_query           → Tier 3 (Notion MCP, credentials page)
   │                                then apply partial reveal policy
+  │                                NO API fallback — MCP is the only source
   │
   ├── doc_link_query             → Tier 2/3 (try API properties first,
-  │                                fall back to MCP page navigation)
+  │                                fall back to MCP page navigation for "Design")
   │
   └── unknown                   → Return graceful "I don't understand" response
 ```
+
+**Broad MCP fallback rule**: For every intent except `credential_query` and `unknown`, if the primary Notion API call returns null (data missing or property not filled in), the router automatically attempts an MCP fetch on the corresponding page before returning a not-found signal. This handles cases where teams have unstructured or inconsistent Notion setups. If both the API and MCP fail, the router returns an explicit "not found" `NotionResult` that Module 5 renders as a graceful message.
 
 ---
 
@@ -344,9 +350,10 @@ Intent received
 |---|---|
 | Workspace Search | Search entire workspace by project name keyword |
 | Page Navigator | Navigate to project page; list child pages |
-| Page Content Reader | Read free-form block content from a Notion page |
-| Credential Extractor | Instruct LLM to extract server host/URL only; suppress passwords/tokens |
+| Page Content Reader | Read free-form block content from a Notion page (returns raw text — no filtering) |
 | Doc Link Finder | Locate Design Link, Drive Link from page content |
+
+> **Note**: The Credential Extractor sub-component has been moved to Module 5 (LLM Response Synthesizer) to keep Module 4 purely responsible for data retrieval. Module 4 returns raw page content unchanged; Module 5 handles the extraction and partial-reveal filtering via prompt engineering. See Module 5 sub-components below.
 
 #### 4c. Cache Layer
 
@@ -374,6 +381,7 @@ Cache implementation: in-memory dictionary for MVP; upgrade to Redis in Phase 2 
 | Multi-answer Formatter | Generates numbered responses matching the user's numbered questions |
 | Language Instruction | Instructs LLM to respond in detected language (Indonesian or English) |
 | Hallucination Guardrail | System prompt explicitly instructs: "Answer only using the provided data. Do not infer or invent information not present in the context." |
+| Credential Extractor | Reads the raw credential page text returned by Module 4, extracts only host/URL fields via a Gemini call, and discards passwords/tokens/API keys before formatting. Moved here from Module 4 to keep data retrieval and LLM interpretation separated. |
 | Credential Formatter | Special template for credential responses: show host/URL, append Notion link, add security note |
 | Not Found Handler | If data is null/empty, LLM responds with friendly "data not found" instead of guessing |
 | Cost Guard | Prompt templates are optimized to minimize token usage; structured JSON is passed instead of raw page dumps |
@@ -453,6 +461,7 @@ cache:
   project_properties_ttl: 1800   # 30 min
   bug_counts_ttl: 300            # 5 min
   changelog_ttl: 900             # 15 min
+  doc_links_ttl: 3600            # 60 min — Tier 3 doc links only (credentials never cached)
 
 llm:
   model: "gemini-2.0-flash"
@@ -635,7 +644,7 @@ Project mana yang dimaksud?
 | Layer | Technology | Rationale |
 |---|---|---|
 | Discord Interface | discord.py (Python 3.11+) | Mature Python Discord library; WebSocket gateway, no HTTP server needed |
-| AI Orchestration | LangChain | Native Python support, MCP integration |
+| LangChain (thin adapter only) | `langchain-mcp-adapters` for MCP connection + `langchain-google-genai` for Gemini wrapper | LangChain does NOT orchestrate routing — Module 3 controls all routing logic in plain Python. LangChain is used purely as an adapter for MCP connection management and Gemini call wrapping. |
 | LLM | Gemini 2.0 Flash — free tier (Google AI Studio) | Zero cost for demo; same provider as production, no migration needed |
 | Notion Structured | Notion API (official Python client) | Fast, reliable for database queries |
 | Notion Unstructured | Notion MCP Server | LLM-navigated page reading |
@@ -650,7 +659,7 @@ Project mana yang dimaksud?
 |---|---|---|
 | Discord Interface | discord.py (Python 3.11+) | Same as demo |
 | API Server | FastAPI — runs alongside discord.py via `asyncio.gather` | Health check endpoint for Railway uptime monitoring; foundation for Phase 2 admin APIs |
-| AI Orchestration | LangChain | Same as demo |
+| LangChain (thin adapter only) | Same as demo | Same as demo |
 | LLM | Gemini 2.0 Flash — paid API | Best cost-to-quality ratio; estimated < $10/month at internal usage scale |
 | Notion Structured | Notion API (official Python client) | Same as demo |
 | Notion Unstructured | Notion MCP Server | Same as demo |

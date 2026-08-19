@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposal — Timedoor Project Assistant Bot v2</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 11pt;
+      color: #000;
+      background: #fff;
+      padding: 56px 64px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      color: #1e6b1e;
+      font-size: 13.5pt;
+      font-weight: bold;
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      font-size: 11pt;
+      font-weight: bold;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .label {
+      font-weight: bold;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .text-box {
+      border: 1px solid #888;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+
+    .checkbox-group {
+      margin: 8px 0 14px 0;
+      line-height: 2;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 16px;
+      font-size: 11pt;
+    }
+
+    table th {
+      border: 1px solid #555;
+      padding: 8px 10px;
+      font-weight: bold;
+      background-color: #f5f5f5;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table td {
+      border: 1px solid #555;
+      padding: 8px 10px;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin: 4px 0;
+    }
+
+    ul li {
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    ol {
+      padding-left: 18px;
+      margin: 4px 0;
+    }
+
+    ol li {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 24px 0;
+    }
+
+    .changes-section h3 {
+      font-size: 11.5pt;
+      margin-top: 16px;
+    }
+
+    .changes-section ul li {
+      margin-bottom: 8px;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    @media print {
+      body { padding: 32px 40px; }
+      .page-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== SECTION 1 ==================== -->
+  <h2>1. Project Information</h2>
+
+  <p><span class="label">Project Title &nbsp;&nbsp;: Timedoor Project Assistant Bot</span></p>
+
+  <p><strong>Project Type (Pick 1 ☑ )</strong></p>
+  <div class="checkbox-group">
+    ☑ Internal Business Improvement<br>
+    ☐ New Business / Product Innovation
+  </div>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 2 ==================== -->
+  <h2>2. Project Overview</h2>
+  <p>What are you building?</p>
+
+  <div class="text-box">
+    Building an AI-powered Discord chatbot that centralizes project information for Timedoor by integrating with Notion using a hybrid approach: structured project metadata is retrieved via the Notion API, while unstructured or free-form pages (credentials, docs, notes) are navigated using the Notion MCP (Model Context Protocol). The bot enables team members (PMs, Developers, QA, CS, and Sales) to query project details — such as tech stacks, project URLs, open bug counts, server credentials, and release versions — directly within Discord using natural language or via private Direct Message (DM), eliminating manual search and scattered documentation overhead.
+  </div>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 3 ==================== -->
+  <h2>3. Business Problem</h2>
+  <p>What problem does it solve? Who experiences it? Why is it important?</p>
+
+  <div class="text-box">
+    Currently, project information at Timedoor is scattered across various Notion pages and databases. Team members across multiple departments waste valuable time manually searching for routine project details or repeatedly escalating questions to colleagues. This disorganization creates communication bottlenecks, slows down issue resolution, and delays responses to client inquiries.
+  </div>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 4 ==================== -->
+  <h2>4. Solution Overview</h2>
+  <p>How will it solve the problem?</p>
+
+  <div class="text-box">
+    Timedoor Project Assistant Bot connects Discord with Notion using a dual-source retrieval strategy. When a user asks a question — either by @mentioning the bot in a configured channel or by sending it a private Direct Message — the bot parses the intent, routes the query to the appropriate Notion data source, and synthesizes a clear natural language response via Gemini 2.0 Flash.<br><br>
+
+    Structured data (project properties, bug counts, changelogs) is fetched directly via the Notion API for speed and accuracy. Unstructured content (credentials pages, design docs, free-form notes) is handled via the Notion MCP Server, which allows the AI to navigate and read pages intelligently without requiring manual structuring.<br><br>
+
+    Responses are delivered in the same language as the user's query (Indonesian or English), with short-term session memory so follow-up questions resolve naturally. Sensitive fields such as passwords and API tokens are never displayed in Discord — only the host/URL is shown, with a direct link to the full Notion credentials page.
+  </div>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 5 ==================== -->
+  <h2>5. Users &amp; Stakeholders</h2>
+
+  <table>
+    <tr>
+      <th>Users</th>
+      <th>Stakeholder</th>
+    </tr>
+    <tr>
+      <td>
+        <ul>
+          <li>PM</li>
+          <li>Developer</li>
+          <li>QA</li>
+          <li>CS</li>
+          <li>Sales</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>PM Leader</li>
+          <li>Sparta Training Program Leads</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 6 ==================== -->
+  <h2>6. Expected Value</h2>
+  <p>Choose 1 based on the type</p>
+  <p>If <strong>Internal Project</strong> (Sample)</p>
+
+  <table>
+    <tr>
+      <th>Category</th>
+      <th>Expected Benefit</th>
+    </tr>
+    <tr>
+      <td>Productivity</td>
+      <td>Cuts time spent searching for project details from minutes to seconds, speeding up daily team syncs and client replies.</td>
+    </tr>
+    <tr>
+      <td>Cost Saving</td>
+      <td>
+        Reduces operational overhead by minimizing repetitive information lookup, unnecessary internal discussions, and delays during project issue escalation.<br><br>
+        Highly cost-efficient pipeline; structured data is fetched directly from Notion API while unstructured content uses MCP — minimizing token consumption and keeping monthly LLM costs under $10.
+      </td>
+    </tr>
+    <tr>
+      <td>Quality Improvement</td>
+      <td>Provides consistent, up-to-date project information from centralized Notion sources, reducing miscommunication and errors caused by outdated or scattered documentation.</td>
+    </tr>
+    <tr>
+      <td>Employee Experience</td>
+      <td>Removes repetitive administrative lookup tasks, allowing developers and PMs to focus on core delivery.</td>
+    </tr>
+    <tr>
+      <td>Other (Add as much as possible)</td>
+      <td>Improves cross-department knowledge sharing by providing instant access to project information through Discord, reducing dependency on specific team members and preserving organizational knowledge.</td>
+    </tr>
+  </table>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 7 ==================== -->
+  <div class="page-break"></div>
+  <h2>7. Scope (1-Month MVP)</h2>
+  <p>Included Features:</p>
+
+  <table>
+    <tr>
+      <th>Feature List</th>
+      <th>Platform / Tech Stack</th>
+    </tr>
+    <tr>
+      <td>
+        <p>1. <strong>Natural Language Project Query Module</strong> — query tech stack, project URL, bug counts, server info, PM, release version via @mention in Discord channels or private DM</p>
+        <br>
+        <p>2. <strong>Live Data Fetching Module</strong> — open bug counts by environment, task list status, latest changelog version</p>
+        <br>
+        <p>3. <strong>Dual-Source Notion Integration &amp; Response Caching</strong> — Notion API for structured data; Notion MCP Server for unstructured pages. Per-data-type cache TTL: project properties 30 min, bug counts 5 min, change log 15 min, credentials no-cache, doc links 60 min</p>
+        <br>
+        <p>4. <strong>Channel &amp; DM Access Configuration</strong> — backend-configurable allow/deny channel list via YAML config file; DM support with server membership verification to restrict access to Timedoor staff only</p>
+        <br>
+        <p>5. <strong>Credential Partial Reveal Policy</strong> — bot surfaces host/URL only; raw passwords, tokens, and API keys are never displayed in Discord; full credentials link to Notion is appended</p>
+        <br>
+        <p>6. <strong>Bilingual Support</strong> — bot detects query language (Indonesian or English) and responds in the same language</p>
+        <br>
+        <p>7. <strong>Stateful Conversation Context</strong> — retains last 3–5 exchanges per user session (30-minute timeout) so follow-up questions resolve without repeating the project name</p>
+      </td>
+      <td>
+        <p><strong>Bot Interface</strong><br>discord.py (Python)</p>
+        <br>
+        <p><strong>Backend Service</strong><br>Python 3.11+ / LangChain</p>
+        <br>
+        <p><strong>Data Integrations</strong><br>Notion API (structured)<br>Notion MCP Server (unstructured)</p>
+        <br>
+        <p><strong>AI LLM Engine</strong><br>Google Gemini 2.0 Flash</p>
+        <br>
+        <p><strong>Config</strong><br>YAML config file</p>
+        <br>
+        <p><strong>Hosting (Demo)</strong><br>Local machine — no public server required; bot connects outward to Discord</p>
+      </td>
+    </tr>
+  </table>
+
+  <p>Excluded Features:</p>
+
+  <table>
+    <tr>
+      <th>Feature List</th>
+      <th>Why Out of Scope</th>
+    </tr>
+    <tr>
+      <td>1. Direct Data Editing / Updating via Discord</td>
+      <td>1-month MVP timeframe; focus is strictly on read-only retrieval to prevent accidental data corruption.</td>
+    </tr>
+    <tr>
+      <td>2. Unstructured File &amp; Voice Input Parsing (PDFs, Images, Audio)</td>
+      <td>Complex multimodal processing requires more than 1 month.</td>
+    </tr>
+    <tr>
+      <td>3. Granular Role-Based Access Control (RBAC)</td>
+      <td>High technical complexity; deferred to post-MVP phase.</td>
+    </tr>
+    <tr>
+      <td>4. Google Sheets &amp; Sensitive Sales Data Integration</td>
+      <td>Deferred to Phase 2 to lower MVP complexity and resolve sales data access rules first.</td>
+    </tr>
+    <tr>
+      <td>5. Slash Commands &amp; Ephemeral Responses</td>
+      <td>@mention + natural language is sufficient for MVP; slash commands deferred to Phase 2.</td>
+    </tr>
+    <tr>
+      <td>6. FastAPI HTTP Server</td>
+      <td>Not needed for bot functionality during demo phase; added in production deployment for health monitoring and future admin APIs.</td>
+    </tr>
+    <tr>
+      <td>7. Proactive Alerts / Notifications</td>
+      <td>Bot is reactive only (responds to queries); push-based alerts are Phase 2.</td>
+    </tr>
+  </table>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 8 ==================== -->
+  <h2>8. MVP Success Criteria</h2>
+  <p>How will success be measured?</p>
+
+  <div class="text-box">
+    <p><strong>Response Latency (Structured):</strong> Bot delivers accurate responses for structured queries (tech stack, PM, bug counts, status) within 7 seconds.</p>
+    <br>
+    <p><strong>Response Latency (Unstructured):</strong> Bot delivers responses for unstructured page queries (credentials, docs, notes) via Notion MCP within 15 seconds.</p>
+    <br>
+    <p><strong>Data Accuracy:</strong> Achieves ≥ 90% factual accuracy on structured project data and ≥ 70% on unstructured page content, verified against live Notion sources.</p>
+    <br>
+    <p><strong>Time Efficiency:</strong> Reduces average time spent looking up project information by at least 40% across participating teams.</p>
+    <br>
+    <p><strong>Monthly LLM Cost:</strong> Keeps monthly AI API costs under $10 USD through structured API fast-path prioritization and response caching.</p>
+    <br>
+    <p><strong>User Adoption:</strong> Weekly active usage by team members across PM, Dev, QA, CS, and Sales roles during the trial period.</p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 9 ==================== -->
+  <h2>9. Risks &amp; Assumptions</h2>
+  <p>Only 5 bullets maximum.</p>
+
+  <ol>
+    <li>
+      <strong>Risk 1 (Data Incompleteness):</strong> If required Notion Database properties are left empty by PMs, the bot will report missing data rather than guess. Mitigated by a pre-launch Notion cleanup task owned by each team's PM.
+    </li>
+    <li>
+      <strong>Risk 2 (API Rate Limits):</strong> High concurrent requests to the Notion API may cause minor response delays. Mitigated by the per-data-type caching layer that reduces repeat API calls.
+    </li>
+    <li>
+      <strong>Risk 3 (Token Cost Control):</strong> Unoptimized prompt sizes could raise LLM costs as Notion data volume grows. Mitigated by prioritizing the structured Notion API fast path for common queries and using MCP only as a fallback for unstructured content.
+    </li>
+    <li>
+      <strong>Risk 4 (Unauthorized DM Access):</strong> External users outside Timedoor may attempt to query internal project data by DMing the bot directly. Mitigated by enforcing a server membership check before processing any DM — non-Timedoor members receive a rejection message with no data exposed.
+    </li>
+    <li>
+      <strong>Risk 5 (User Habit Persistence):</strong> Team members continuing old habits of asking colleagues directly instead of querying the Discord bot. Mitigated by an awareness campaign at launch and deploying the bot in existing team channels to minimize friction.
+    </li>
+  </ol>
+
+  <hr class="divider">
+
+  <!-- ==================== SECTION 10 ==================== -->
+  <div class="page-break"></div>
+  <h2>10. AI Integration (Optional)</h2>
+  <p>Will AI be used?</p>
+
+  <div class="checkbox-group">
+    ☐ No AI<br>
+    ☑ Yes
+  </div>
+
+  <p>AI Capability</p>
+  <div class="text-box">
+    Uses a structured query-synthesis pipeline powered by Google Gemini 2.0 Flash. The bot interprets natural language queries from Discord, routes each intent to the appropriate Notion data source (Notion API for structured databases, Notion MCP Server for unstructured pages), and synthesizes the retrieved data into clear, human-readable answers. The LLM is explicitly instructed to answer only using the provided data and never invent information not present in the source — preventing hallucination on internal project details.
+  </div>
+
+  <p>Business Purpose:</p>
+  <div class="text-box">
+    To convert Timedoor's Notion project databases into an interactive, conversational assistant accessible directly within Discord. This minimizes internal search time, eliminates repetitive context-switching, and streamlines cross-departmental communication without incurring heavy AI operational costs. The hybrid Notion API + MCP approach ensures both speed for routine structured queries and coverage for complex, free-form content.
+  </div>
+
+  <hr class="divider">
+
+  <!-- ==================== SUMMARY OF CHANGES ==================== -->
+  <div class="page-break"></div>
+  <h2>Summary of Changes</h2>
+  <p style="margin-bottom: 14px;">Changes from the previous proposal version to this updated version (v2):</p>
+
+  <div class="changes-section">
+
+    <h3>1. Tech Stack Corrections</h3>
+    <ul>
+      <li><strong>Discord library corrected to discord.py:</strong> The previous version listed Discord.js (JavaScript). The finalized stack uses discord.py (Python) consistent with the Python backend.</li>
+      <li><strong>FastAPI removed from MVP scope:</strong> FastAPI is not needed for bot functionality — discord.py connects outward to Discord via WebSocket with no inbound HTTP server required. FastAPI is added back in the production deployment phase for health monitoring and future admin APIs.</li>
+      <li><strong>LLM finalized as Google Gemini 2.0 Flash:</strong> OpenAI GPT / GPT-4o-mini removed. Gemini 2.0 Flash is the finalized model for its cost-to-quality ratio and bilingual support.</li>
+      <li><strong>Notion MCP Server added:</strong> The previous version only listed Notion API. The finalized architecture uses a hybrid: Notion API for structured data (Tier 1/2) and Notion MCP Server for unstructured pages such as credentials, design docs, and free-form notes (Tier 3).</li>
+    </ul>
+
+    <h3>2. Terminology Fix</h3>
+    <ul>
+      <li><strong>"RAG pipeline" replaced with accurate description:</strong> The system does not use Retrieval-Augmented Generation (which implies vector embeddings and semantic search). It uses direct Notion API querying for structured data and LLM-navigated MCP page reading for unstructured content. The updated proposal uses this accurate description throughout.</li>
+    </ul>
+
+    <h3>3. Feature Additions</h3>
+    <ul>
+      <li><strong>Direct Message (DM) support added:</strong> Users can query the bot privately via DM without @mentioning it in a channel. Access is gated by Discord server membership verification to restrict usage to Timedoor staff.</li>
+      <li><strong>Credential partial reveal policy added:</strong> Explicitly documented — host/URL shown, sensitive fields (passwords, tokens, API keys) never appear in Discord, full credentials link to Notion appended.</li>
+      <li><strong>Bilingual support and stateful session context added:</strong> Bot detects and responds in the user's language (Indonesian/English); retains 3–5 exchange history per session with 30-minute timeout.</li>
+    </ul>
+
+    <h3>4. MVP Success Criteria Updated</h3>
+    <ul>
+      <li><strong>Split response latency targets:</strong> Structured queries &lt; 7 seconds; unstructured/MCP queries &lt; 15 seconds.</li>
+      <li><strong>Accuracy targets split by data type:</strong> ≥ 90% for structured data, ≥ 70% for unstructured/MCP content.</li>
+      <li><strong>Monthly LLM cost target added:</strong> &lt; $10 USD/month as a formal success metric.</li>
+    </ul>
+
+    <h3>5. Risk Updates</h3>
+    <ul>
+      <li><strong>Risk 4 updated to Unauthorized DM Access:</strong> Reflects the newly added DM feature and the security control (server membership check) that prevents external users from accessing internal Notion data via DM.</li>
+    </ul>
+
+    <h3>6. Out of Scope Updated</h3>
+    <ul>
+      <li><strong>FastAPI HTTP server, slash commands, and proactive alerts</strong> explicitly added to the out-of-scope table for clarity.</li>
+    </ul>
+
+  </div>
+
+</body>
+</html>

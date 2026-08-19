@@ -156,6 +156,13 @@ async def _find_child_database(page_id: str, name_hint: str) -> str | None:
 - Returns `NotionResult` with `data = {"version": str, "date": str, "notes": str | None}`
 - If child database not found: return `NotionResult(data=None, ...)`
 
+**`list_all_project_names()`** — startup registry loader (called by Module 2):
+- Queries all team databases from `get_config().notion.databases` with no filter, paginating through all results
+- Extracts the `Name` property (title field) from each page
+- Returns a flat `list[str]` of all project names across all teams
+- Not cached — only called once at startup via `initialize_project_registry()` in Module 2
+- On failure: logs via `get_error_logger()` and returns empty list (bot starts but fuzzy matching is disabled)
+
 ---
 
 ### Step 3 — Implement `src/fetcher/notion_mcp.py`
@@ -257,6 +264,7 @@ from src.fetcher.notion_api import (
     get_project_properties,
     get_bug_count,
     get_latest_changelog,
+    list_all_project_names,
 )
 from src.fetcher.notion_mcp import fetch_mcp_page_content
 ```

@@ -240,21 +240,24 @@ async def _run_pipeline(message: discord.Message, bot: discord.Client) -> None:
 
 7. await message.reply(embed=embed, mention_author=False)
 
-8. add_to_session(
-       user_id=message.author.id,
-       channel_id=message.channel.id,
-       user_message=message.content,
-       bot_response=response.content,
-   )
-
-9. If resolved_project is not None:
-       update_session_project(
+8. If the request was NOT a session reset, persist to session:
+   is_reset = any(intent.intent == "session_reset" for intent, _ in results)
+   if not is_reset:
+       add_to_session(
            user_id=message.author.id,
            channel_id=message.channel.id,
-           project_name=resolved_project,
+           user_message=message.content,
+           bot_response=response.content,
        )
+       # Only track last_project when the session is alive — reset explicitly clears it
+       if resolved_project is not None:
+           update_session_project(
+               user_id=message.author.id,
+               channel_id=message.channel.id,
+               project_name=resolved_project,
+           )
 
-10. duration_ms = int((time.perf_counter() - start_time) * 1000)
+9. duration_ms = int((time.perf_counter() - start_time) * 1000)
     get_latency_logger().info(
         "request_complete",
         extra={
@@ -368,6 +371,7 @@ All downstream modules (parser, router, synthesizer) are mocked. Tests verify ga
 | T12 | Session updated after successful reply | `add_to_session` + `update_session_project` | Both functions called with correct arguments after reply is sent |
 | T13 | Pipeline exception sends error embed, does not raise | `route_query` raises an exception | Error embed sent to user; exception does not propagate |
 | T14 | End-to-end latency logged after each request | Capture `tab.latency` logger | Log entry has `duration_ms`, `user_id`, `question_count`, `is_error` |
+| T15 | `session_reset` response does NOT re-populate session | `synthesize_response` returns response for `session_reset` intent | `add_to_session` and `update_session_project` never called after reply is sent |
 
 ---
 

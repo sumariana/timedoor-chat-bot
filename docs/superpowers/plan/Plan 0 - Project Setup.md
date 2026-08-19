@@ -307,12 +307,14 @@ load_dotenv(dotenv_path="../../.env")
 
 
 async def main() -> None:
-    # Imports are deferred here so modules can be developed independently.
-    # Replace each import with the real implementation as modules are completed.
-    from src.config.loader import load_config
-    from src.gateway.client import create_bot
+    # Package-level imports — modules re-export their public API via __init__.py.
+    # Deferred inside main() so that missing modules do not break unrelated imports
+    # while different engineers are still building their pieces.
+    from src.config import load_config, setup_logging
+    from src.gateway import create_bot
 
     config = load_config(config_path="../../config/config.yaml")
+    setup_logging(config)
     bot = create_bot(config)
     await bot.start(os.environ["DISCORD_BOT_TOKEN"])
 
@@ -321,7 +323,9 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-> `load_config` and `create_bot` do not exist yet — they will be implemented in Module 6 and Module 1 respectively. `main.py` will raise an ImportError until those modules are complete. This is expected.
+> `load_config`, `setup_logging`, and `create_bot` do not exist yet — they will be implemented in Module 6 and Module 1 respectively. `main.py` will raise an ImportError until those modules are complete. This is expected.
+>
+> This skeleton matches the final `main.py` defined in Plan 6 (Module 1) — no rewrites needed once modules are done.
 
 ---
 

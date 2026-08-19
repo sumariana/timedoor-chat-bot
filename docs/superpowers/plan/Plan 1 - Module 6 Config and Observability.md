@@ -199,14 +199,17 @@ The audit log must never contain credential content. When logging a `credential_
 ### Step 4 — Export from `src/config/__init__.py`
 
 ```python
+from src.config.models import AppConfig
 from src.config.loader import load_config, get_config
 from src.config.logging import setup_logging, get_latency_logger, get_error_logger, get_audit_logger
 ```
 
 All other modules import from `src.config` directly:
 ```python
-from src.config import get_config, get_error_logger
+from src.config import get_config, get_error_logger, AppConfig
 ```
+
+**Note**: `AppConfig` is re-exported at the package level so consumers (e.g., Module 1's `create_bot(config: AppConfig)`) can import it as `from src.config import AppConfig` without reaching into `src.config.models`.
 
 ---
 

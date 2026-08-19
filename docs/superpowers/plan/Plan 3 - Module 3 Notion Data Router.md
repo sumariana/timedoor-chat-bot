@@ -290,15 +290,11 @@ async def route_query(
             results.append((question, _not_found_result()))
             continue
 
-        # Ambiguous project name — pass candidates to Module 5 for clarification prompt
+        # Ambiguous project name — skip routing entirely. Module 5 reads
+        # `intent.is_ambiguous` and `intent.candidates` from QueryIntent directly,
+        # so the NotionResult carries no payload here.
         if question.is_ambiguous:
-            results.append((question, NotionResult(
-                data={"ambiguous": True, "candidates": question.candidates},
-                source=None,
-                tier=None,
-                from_cache=False,
-                notion_url=None,
-            )))
+            results.append((question, _not_found_result()))
             continue
 
         resolution = resolution_cache.get(question.project_name)
@@ -420,7 +416,7 @@ All Module 4 fetch functions are mocked. Tests verify routing decisions only —
 | T14 | `project_info` with null API result triggers MCP fallback | `get_project_properties` returns `data=None`; `fetch_mcp_page_content` returns valid data | `fetch_mcp_page_content(page_hint="Overview")` called |
 | T15 | Both API and MCP null returns `NotionResult(data=None, source="mcp", tier=3)` | Both fetchers return `data=None` | Final result has `data=None`, `source="mcp"`, `tier=3` |
 | T16 | `credential_query` does NOT try API fallback | `fetch_mcp_page_content` returns `data=None` | `get_project_properties`, `get_bug_count`, `get_latest_changelog` never called |
-| T17 | Ambiguous intent skips routing and returns candidates payload | `QueryIntent(is_ambiguous=True, candidates=["Inwan (Orange Care)", "Inwan Bali"])` | `NotionResult(data={"ambiguous": True, "candidates": [...]})` returned; no Module 4 fetch called |
+| T17 | Ambiguous intent skips routing without calling any fetcher | `QueryIntent(is_ambiguous=True, candidates=["Inwan (Orange Care)", "Inwan Bali"])` | `NotionResult(data=None)` returned; no Module 4 fetch called; Module 5 reads candidates from `intent.candidates` directly |
 
 ---
 

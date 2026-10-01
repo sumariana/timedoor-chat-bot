@@ -1,28 +1,20 @@
-# Environment & secrets — never commit these
+# Secrets
 .env
 .env.*
+!.env.example
 config.local.yaml
 secrets.yaml
 
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-.Python
-
-# Virtual environments
-venv/
+*.egg-info/
 .venv/
-env/
-.env/
-
-# Distribution / packaging
+venv/
 dist/
 build/
-*.egg-info/
 
-# Test & coverage
+# Testing
 .pytest_cache/
 .coverage
 htmlcov/
@@ -31,10 +23,10 @@ htmlcov/
 *.log
 logs/
 
-# macOS
+# OS
 .DS_Store
+Thumbs.db
 
 # IDE
-.idea/
 .vscode/
-*.swp
+.idea/

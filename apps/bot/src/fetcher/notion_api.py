@@ -9,7 +9,7 @@ from src.models import NotionResult
 
 _client: AsyncClient | None = None
 
-_ACTIVE_STATUSES = ("Open", "In Progress", "Re-Opened", "Re-Test")
+_ACTIVE_STATUSES = ("Open", "In progress", "Re-Opened", "Re-Test")
 
 
 def _get_client() -> AsyncClient:

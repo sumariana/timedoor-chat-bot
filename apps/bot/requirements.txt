@@ -8,7 +8,7 @@ langchain-google-genai>=2.0.0     # Gemini 2.0 Flash wrapper (used by Module 5)
 langchain-mcp-adapters>=0.0.5     # Notion MCP connection (used by Module 4)
 
 # LLM — Gemini SDK (used by Module 2 for intent classification via direct SDK)
-google-generativeai>=0.8.0
+google-genai>=1.0.0
 
 # Notion
 notion-client>=2.2.1

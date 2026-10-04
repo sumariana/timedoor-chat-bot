@@ -1,8 +1,18 @@
 import json
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 from src.config import get_config, get_error_logger
+
+_client: genai.Client | None = None
+
+
+def _get_client() -> genai.Client:
+    global _client
+    if _client is None:
+        _client = genai.Client(api_key=get_config().llm.api_key)
+    return _client
 
 CLASSIFICATION_PROMPT = """You are an intent classifier for the Timedoor Project Assistant — an internal company chatbot.
 
@@ -69,18 +79,17 @@ def _build_history_text(history: list[dict]) -> str:
 async def classify_message(user_message: str, history: list[dict]) -> tuple[str, list[dict]]:
     try:
         config = get_config().llm
-        genai.configure(api_key=config.api_key)
-        model = genai.GenerativeModel(config.model)
         prompt = CLASSIFICATION_PROMPT.format(
             history=_build_history_text(history), user_message=user_message
         )
-        response = await model.generate_content_async(
-            prompt,
-            generation_config={
-                "temperature": config.temperature,
-                "max_output_tokens": config.max_output_tokens,
-                "response_mime_type": "application/json",
-            },
+        response = await _get_client().aio.models.generate_content(
+            model=config.model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=config.temperature,
+                max_output_tokens=config.max_output_tokens,
+                response_mime_type="application/json",
+            ),
         )
         parsed = json.loads(response.text)
         return parsed["language"], parsed["questions"]

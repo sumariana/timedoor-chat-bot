@@ -1,8 +1,11 @@
+import logging
 import time
 
 import discord
 
 from src.config import AppConfig, get_config, get_error_logger, get_latency_logger
+
+_log = logging.getLogger(__name__)
 from src.gateway.filters import is_channel_allowed, is_dm, is_timedoor_member
 from src.gateway.formatters import build_dm_rejected_embed, build_embed, build_rate_limit_embed
 from src.gateway.rate_limiter import get_rate_limiter
@@ -26,7 +29,7 @@ def create_bot(config: AppConfig) -> discord.Client:
 
     @bot.event
     async def on_ready() -> None:
-        get_error_logger().info("Logged in as %s", bot.user)
+        _log.info("Logged in as %s", bot.user)
         await initialize_project_registry()
 
     @bot.event
@@ -62,12 +65,14 @@ async def _handle_message(message: discord.Message, bot: discord.Client) -> None
 
 async def _run_pipeline(message: discord.Message, bot: discord.Client) -> None:
     start_time = time.perf_counter()
+    language = "id"
     try:
         parsed = await parse_message(
             message_text=message.content,
             user_id=message.author.id,
             channel_id=message.channel.id,
         )
+        language = parsed.questions[0].language if parsed.questions else "id"
 
         results = await route_query(parsed)
 
@@ -106,11 +111,10 @@ async def _run_pipeline(message: discord.Message, bot: discord.Client) -> None:
         )
     except Exception as exc:
         get_error_logger().error("Pipeline failed: %s", exc, extra={"module": "gateway"})
-        error_embed = build_embed(
-            BotResponse(
-                content="Sorry, something went wrong while processing your request.",
-                language="en",
-                is_error=True,
-            )
+        error_content = (
+            "Maaf, terjadi kesalahan saat memproses permintaan Anda."
+            if language == "id"
+            else "Sorry, something went wrong while processing your request."
         )
+        error_embed = build_embed(BotResponse(content=error_content, language=language, is_error=True))
         await message.reply(embed=error_embed, mention_author=False)

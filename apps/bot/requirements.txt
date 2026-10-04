@@ -1,0 +1,32 @@
+# Discord
+discord.py>=2.3.2
+
+# LangChain — thin adapter for MCP connection + Gemini wrapper only
+# (Router logic in Module 3 is plain Python — LangChain does NOT orchestrate routing)
+langchain>=0.3.0
+langchain-google-genai>=2.0.0     # Gemini 2.0 Flash wrapper (used by Module 5)
+langchain-mcp-adapters>=0.0.5     # Notion MCP connection (used by Module 4)
+
+# LLM — Gemini SDK (used by Module 2 for intent classification via direct SDK)
+google-generativeai>=0.8.0
+
+# Notion
+notion-client>=2.2.1
+
+# MCP protocol SDK — required transitively by langchain-mcp-adapters
+mcp>=1.0.0
+
+# Config & environment
+PyYAML>=6.0.1
+python-dotenv>=1.0.0
+
+# Fuzzy matching (Module 2 — Entity Extractor)
+rapidfuzz>=3.9.0
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+
+# Production only — uncomment when deploying to Railway
+# fastapi>=0.111.0
+# uvicorn>=0.30.0

@@ -1,0 +1,32 @@
+discord:
+  allowed_channels:
+    - "REPLACE_WITH_CHANNEL_ID"     # e.g. #project-bot
+  denied_channels: []
+  allow_dms: true
+  dm_require_server_membership: true
+  timedoor_server_id: "REPLACE_WITH_SERVER_ID"
+
+notion:
+  databases:
+    mobile_team: "REPLACE_WITH_NOTION_DB_ID"
+    web_team: "REPLACE_WITH_NOTION_DB_ID"
+    backend_team: "REPLACE_WITH_NOTION_DB_ID"
+
+session:
+  max_history: 5
+  timeout_minutes: 30
+
+cache:
+  project_properties_ttl: 1800     # 30 min — Tier 1
+  bug_counts_ttl: 300               # 5 min  — Tier 2
+  changelog_ttl: 900                # 15 min — Tier 2
+  doc_links_ttl: 3600               # 60 min — Tier 3 (doc links only)
+  # credentials: no cache — always fetched fresh
+
+llm:
+  model: "gemini-2.0-flash"
+  temperature: 0.2
+  max_output_tokens: 1024
+
+rate_limit:
+  max_queries_per_user_per_minute: 5

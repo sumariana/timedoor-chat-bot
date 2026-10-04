@@ -99,6 +99,10 @@ touch apps/api/.gitkeep
 ```gitignore
 # Secrets
 .env
+.env.*
+!.env.example
+config.local.yaml
+secrets.yaml
 
 # Python
 __pycache__/
@@ -114,6 +118,10 @@ build/
 .coverage
 htmlcov/
 
+# Logs
+*.log
+logs/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -121,6 +129,9 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# `.env.example` is the only environment file intended for version control.
+# Local environment variants, secret overrides, and logs remain ignored.
 ```
 
 ---

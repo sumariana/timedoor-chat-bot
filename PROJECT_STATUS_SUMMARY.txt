@@ -1,0 +1,255 @@
+TIMEDOOR PROJECT ASSISTANT BOT
+PROJECT STATUS SUMMARY
+Updated: 2026-10-02
+
+==================================================
+CURRENT REPOSITORY STATE
+==================================================
+
+Branch: feature/bot-development
+Working tree: clean at the time of review
+Latest commit: 1d876c1 - add core modules and initial implementation
+Main branch: main
+Branch status: feature branch contains the implementation and is not yet merged to main
+
+==================================================
+WORK COMPLETED
+==================================================
+
+1. PROJECT PLANNING AND DOCUMENTATION
+
+- Product requirements document created.
+- Kickoff meeting and proposal documents included.
+- Module breakdown documented.
+- Implementation Plans 0 through 6 created:
+  - Plan 0: Project Setup
+  - Plan 1: Configuration and Observability
+  - Plan 2: Data Fetcher
+  - Plan 3: Notion Data Router
+  - Plan 4: Query Parser
+  - Plan 5: LLM Response Synthesizer
+  - Plan 6: Discord Gateway
+
+2. PROJECT SETUP
+
+- Python project structure created under apps/bot.
+- Environment variable template created in .env.example.
+- Git ignore rules configured.
+- YAML configuration created at config/config.yaml.
+- Python dependencies listed in apps/bot/requirements.txt.
+- Application entry point created at apps/bot/main.py.
+
+3. MODULE 6 - CONFIGURATION AND OBSERVABILITY
+
+Implemented:
+- YAML configuration loader.
+- Configuration data models.
+- Environment-variable validation for required credentials.
+- Configurable Discord, Notion, LLM, cache and logging settings.
+- Latency logger.
+- Error logger.
+- Query audit logger.
+
+Not implemented:
+- Health check endpoint. The plan explicitly defers this to the production phase.
+
+4. MODULE 4 - DATA FETCHER
+
+Implemented:
+- Notion API client.
+- Project property fetching.
+- Bug count fetching, including environment filtering.
+- Change-log/latest-version fetching.
+- Notion MCP client wrapper.
+- MCP page-content fetching.
+- Credential extraction flow that returns server host/URL while suppressing passwords, tokens and API keys.
+- In-memory cache with configurable TTL values.
+- Fetch latency and error logging.
+
+5. MODULE 3 - NOTION DATA ROUTER
+
+Implemented:
+- Query routing by intent.
+- Tier 1 and Tier 2 Notion API routing.
+- Tier 3 MCP routing for credentials and unstructured documents.
+- API-to-MCP fallback when API data is empty or unavailable.
+- Property-name normalizer for naming variants.
+- Explicit not-found results.
+
+6. MODULE 2 - QUERY PARSER
+
+Implemented:
+- Per-user, per-channel session storage.
+- Recent conversation history.
+- Session expiry after inactivity.
+- Manual session reset command.
+- Gemini-based intent classification.
+- Indonesian/English language detection through the classifier response.
+- Multiple-question parsing.
+- Project-name extraction.
+- Fuzzy project matching.
+- Ambiguity detection.
+- Project context inheritance from session history.
+- Query audit logging.
+
+7. MODULE 5 - LLM RESPONSE SYNTHESIZER
+
+Implemented:
+- Prompt builder.
+- Gemini response generation.
+- Structured retrieved-data input.
+- Multi-answer formatting.
+- Indonesian/English response instruction.
+- Not-found response formatting.
+- Ambiguous-project response formatting.
+- Credential-specific response formatting.
+- Credential extraction that excludes sensitive values.
+- LLM settings from configuration.
+
+8. MODULE 1 - DISCORD GATEWAY
+
+Implemented:
+- Discord client creation.
+- Persistent bot startup flow.
+- Mention-based message handling.
+- Configurable channel allow/deny filtering.
+- Optional DM handling.
+- Timedoor-member check for DMs.
+- Typing indicator while processing.
+- Per-user rate limiting.
+- Discord embed response formatting.
+- Color-coded credential/error/success responses.
+- Full parser -> router -> synthesizer -> Discord response pipeline.
+- Session update after successful responses.
+- Latency and error logging.
+
+==================================================
+VALIDATION COMPLETED
+==================================================
+
+- 35 integration tests pass.
+- Test command:
+  apps/bot/.venv/Scripts/python -m pytest -q
+- Current test result: 35 passed.
+- Tests use mocks/fakes for external Discord, Notion, MCP and Gemini services.
+- No real-service smoke test has been completed yet.
+
+==================================================
+REMAINING WORK
+==================================================
+
+1. REAL-SERVICE VALIDATION
+
+- Run the bot with real Discord, Notion and Gemini credentials.
+- Verify that Notion database properties match the configured normalizer.
+- Verify bug-list and change-log queries against real databases.
+- Verify the MCP server can start and expose the expected tools.
+- Verify MCP document and credential reads.
+- Verify that no passwords, tokens or API keys appear in responses or logs.
+
+2. DISCORD TESTING
+
+Test in a private Discord channel:
+- Each supported intent.
+- Fuzzy project names and typos.
+- Multiple questions in one message.
+- Indonesian and English queries.
+- Session context inheritance.
+- Manual reset.
+- Rate limiting.
+- Denied channels.
+- DM permission behavior.
+- Notion/API/MCP failure behavior.
+
+3. HEALTH CHECK
+
+- Add the deferred /health endpoint.
+- Add FastAPI and uvicorn dependencies when deployment begins.
+- Report Discord, Notion and LLM connectivity status.
+
+4. TEST COVERAGE
+
+Currently empty:
+- apps/bot/tests/unit/
+- apps/bot/tests/e2e/
+
+Recommended additions:
+- Unit tests for property normalization.
+- Unit tests for cache expiration.
+- Unit tests for rate limiting.
+- Unit tests for fuzzy project matching.
+- One end-to-end pipeline test using fake external services.
+
+5. KNOWN TECHNICAL CLEANUPS
+
+- The gateway's generic error response is hardcoded with language="en". Make it language-aware.
+- google.generativeai is deprecated. Migrate to the supported google.genai SDK.
+- Confirm that the external command notion-mcp-server is installed and configured in deployment.
+- Review MCP tool names and response formats against the actual MCP server.
+
+6. DEPLOYMENT
+
+Not yet implemented:
+- Dockerfile.
+- Railway or other hosting configuration.
+- Production process configuration.
+- Deployment documentation.
+- API service implementation. apps/api currently contains only .gitkeep.
+- README with setup, environment variables, development and deployment instructions.
+
+7. RELEASE MANAGEMENT
+
+- Feature branch has not been merged to main.
+- Pull request has not been opened.
+- Code review and security review should run before merge.
+
+==================================================
+NEXT ACTION PLAN
+==================================================
+
+PHASE 1 - INTEGRATION SMOKE TEST
+
+1. Confirm required environment variables are set without printing their values.
+2. Start with one real Notion project database.
+3. Test project properties, bug counts and latest change log.
+4. Confirm MCP startup and tool discovery.
+5. Confirm credential redaction.
+
+PHASE 2 - DISCORD UAT
+
+1. Run the bot locally.
+2. Use a private test channel.
+3. Execute the intent, language, session, permission and failure scenarios listed above.
+4. Record failures and fix only confirmed issues.
+
+PHASE 3 - QUALITY HARDENING
+
+1. Fix language-aware error responses.
+2. Add focused unit tests and one fake-service end-to-end test.
+3. Migrate the deprecated Gemini SDK.
+4. Add health check if production deployment is next.
+
+PHASE 4 - DEPLOYMENT
+
+1. Add README and deployment configuration.
+2. Add Dockerfile or Railway process configuration.
+3. Configure production secrets through the hosting platform.
+4. Run production-like smoke tests.
+
+PHASE 5 - REVIEW AND MERGE
+
+1. Run the full test suite.
+2. Run code review.
+3. Run security review.
+4. Open a pull request from feature/bot-development to main.
+5. Merge after review and UAT approval.
+
+==================================================
+IMPORTANT SECURITY NOTES
+==================================================
+
+- Never commit .env or real credentials.
+- Never print credential values into chat or logs.
+- Credential responses must expose only the approved server host/URL and Notion link.
+- Passwords, tokens and API keys must remain suppressed.
+- Verify secret handling again before deployment.
